@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="gbk"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>bitcoin源码分析</title>
+<meta http-equiv="Content-Type" content="text/html;charset=gbk"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-02-11 15:19:39 CST"/>
+<meta name="author" content="root"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">bitcoin源码分析</h1>
+
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 准备工作 </a>
+<ul>
+<li><a href="#sec-1.1">1.1 1.产生调试信息 </a></li>
+<li><a href="#sec-1.2">1.2 2.gdb里增加对stl的支持 </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 开始分析 </a>
+<ul>
+<li><a href="#sec-2.1">2.1 静态分析 </a>
+<ul>
+<li><a href="#sec-2.1.1">2.1.1 配置文件、快链数据文件、索引文件及相关目录: </a></li>
+<li><a href="#sec-2.1.2">2.1.2 源代码文件说明: </a></li>
+</ul>
+</li>
+<li><a href="#sec-2.2">2.2 动态分析 </a>
+<ul>
+<li><a href="#sec-2.2.1">2.2.1 配置bitcoin.conf </a></li>
+<li><a href="#sec-2.2.2">2.2.2 开始调试 </a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 准备工作 </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>假设你已经对STL及gdb有了一些基本认识，熟悉C++编程。
+</p>
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1"><span class="section-number-3">1.1</span> 1.产生调试信息 </h3>
+<div class="outline-text-3" id="text-1.1">
+
+<p>在configure.ac文件里增加2行代码：
+</p>
+
+
+<pre class="example">AC_INIT([Bitcoin]...
+: ${CFLAGS="-g -ggdb"}
+: ${CXXFLAGS="-g -ggdb"}
+</pre>
+
+
+
+
+<p>
+按照doc/build-unix.md文件里的的要求重新配置并编译：
+</p><pre class="example">
+./autogen.sh
+./configure
+make -B //如果是第一次编译，不需要-B
+</pre>
+
+
+<p>
+这样在输出的.o文件及elf文件里就会包含有调试信息,否则默认会使用-O2优化选项。
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2"><span class="section-number-3">1.2</span> 2.gdb里增加对stl的支持 </h3>
+<div class="outline-text-3" id="text-1.2">
+
+<p>bitcoin里大量使用了stl，方便在Linux、Windows、Mac间移植。
+7.0以后的gdb已经增加了对Python的支持,通过Python，增加gdb对STL的支持：
+<a href="http://sourceware.org/gdb/wiki/STLSupport">http://sourceware.org/gdb/wiki/STLSupport</a>
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 开始分析 </h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> 静态分析 </h3>
+<div class="outline-text-3" id="text-2.1">
+
+
+</div>
+
+<div id="outline-container-2.1.1" class="outline-4">
+<h4 id="sec-2.1.1"><span class="section-number-4">2.1.1</span> 配置文件、快链数据文件、索引文件及相关目录: </h4>
+<div class="outline-text-4" id="text-2.1.1">
+
+<p>在root下有一个目录.bitcoin,首先介绍下几个文件:
+</p><dl>
+<dt>bitcoin.conf </dt><dd>
+配置文件，bitcoind启动的时候会读取这个文件
+</dd>
+<dt>debug.log </dt><dd>
+调试信息输出到这个文件里
+</dd>
+<dt>peers.dat </dt><dd>
+存储的其他peer的信息
+</dd>
+<dt>wallet.dat </dt><dd>
+钱包文件
+</dd>
+<dt>blocks </dt><dd>
+快链(block chain)存储的地方
+</dd>
+<dt>chainstate</dt><dd>
+快链的状态
+</dd>
+<dt>testnet3 </dt><dd>
+用于测试的快链,有一个不同的起始块(genesis block),testnet1中的起始块,就是目前大家在交易的块链。
+
+</dd>
+</dl>
+</div>
+
+</div>
+
+<div id="outline-container-2.1.2" class="outline-4">
+<h4 id="sec-2.1.2"><span class="section-number-4">2.1.2</span> 源代码文件说明: </h4>
+<div class="outline-text-4" id="text-2.1.2">
+
+<p>.h文件及.cpp文件中类的定义及说明:
+<a href="https://dev.visucore.com/bitcoin/doxygen">Doxygen自动产生的说明</a>
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> 动态分析 </h3>
+<div class="outline-text-3" id="text-2.2">
+
+
+</div>
+
+<div id="outline-container-2.2.1" class="outline-4">
+<h4 id="sec-2.2.1"><span class="section-number-4">2.2.1</span> 配置bitcoin.conf </h4>
+<div class="outline-text-4" id="text-2.2.1">
+
+<pre class="example">
+testnet=1
+</pre>
+
+<p>使用测试网络,详见<a href="https://en.bitcoin.it/wiki/Running_Bitcoin">bitcoin.conf的详细配置</a>
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2.2.2" class="outline-4">
+<h4 id="sec-2.2.2"><span class="section-number-4">2.2.2</span> 开始调试 </h4>
+<div class="outline-text-4" id="text-2.2.2">
+
+<pre class="example">
+gdb bitcoind
+</pre>
+
+<p>好了,从bitcoind里读取symbol的时间可能会稍微长点:
+</p><pre class="example">
+Reading symbols from bitcoin/src/bitcoind...done.
+</pre>
+
+<p>开始调试:
+</p><pre class="example">
+b main
+run
+</pre>
+
+
+
+
+<pre class="src src-C++">int main(int argc, char* argv[])
+{
+    bool fRet = false;
+
+    // Connect bitcoind signal handlers
+    noui_connect();
+
+    fRet = AppInit(argc, argv);
+
+    if (fRet &amp;&amp; fDaemon)
+        return 0;
+
+    return (fRet ? 0 : 1);
+ }
+</pre>
+
+
+
+
+<p>
+main()函数的重点是AppInit(),noui<sub>connect</sub>()是用来链接前端Qt的初始化程序，图形界面我们就不分析了，直接进入到AppInit()
+</p>
+
+
+
+<pre class="src src-C++">1. bool AppInit(int argc, char* argv[])
+2. {
+3.     boost::thread_group threadGroup;//&#20351;&#29992;boost&#30340;&#22810;&#32447;&#31243;,&#20351;&#24471;&#21069;&#31471;Qt&#31243;&#24207;&#36816;&#34892;&#27969;&#30021;
+4.     boost::thread* detectShutdownThread = NULL;//&#22312;&#31243;&#24207;&#21551;&#21160;&#26399;&#38388;&#65292;&#22914;&#26524;&#25353;&#20102;Ctrl-C&#38190;&#36864;&#20986;&#65292;&#21017;&#35753;&#22810;&#32447;&#31243;&#22788;&#29702;&#23436;&#21518;&#36864;&#20986;
+
+5.     bool fRet = false;
+6.     try
+7.     {
+8.         //
+9.         // Parameters
+10.         //
+11.         // If Qt is used, parameters/bitcoin.conf are parsed in qt/bitcoin.cpp's main()
+12.         ParseParameters(argc, argv);
+13.         if (!boost::filesystem::is_directory(GetDataDir(false)))
+14.         {
+15.             fprintf(stderr, <span style="color: #ffff00;">"Error: Specified data directory \"%s\" does not exist.\n"</span>, mapArgs[<span style="color: #ffff00;">"-datadir"</span>].c_str());
+16.             return false;
+17.         }
+18.         ReadConfigFile(mapArgs, mapMultiArgs);
+19.         // Check for -testnet or -regtest parameter (TestNet() calls are only valid after this clause)
+20.         if (!SelectParamsFromCommandLine()) {
+21.             fprintf(stderr, <span style="color: #ffff00;">"Error: Invalid combination of -regtest and -testnet.\n"</span>);
+22.             return false;
+23.         }
+
+24.         if (mapArgs.count(<span style="color: #ffff00;">"-?"</span>) || mapArgs.count(<span style="color: #ffff00;">"--help"</span>))
+25.         {
+26.             // First part of help message is specific to bitcoind / RPC client
+27.             std::string strUsage = _(<span style="color: #ffff00;">"Bitcoin Core Daemon"</span>) + <span style="color: #ffff00;">" "</span> + _(<span style="color: #ffff00;">"version"</span>) + <span style="color: #ffff00;">" "</span> + FormatFullVersion() + <span style="color: #ffff00;">"\n\n"</span> +
+28.                 _(<span style="color: #ffff00;">"Usage:"</span>) + <span style="color: #ffff00;">"\n"</span> +
+29.                   <span style="color: #ffff00;">"  bitcoind [options]                     "</span> + _(<span style="color: #ffff00;">"Start Bitcoin server"</span>) + <span style="color: #ffff00;">"\n"</span> +
+30.                 _(<span style="color: #ffff00;">"Usage (deprecated, use bitcoin-cli):"</span>) + <span style="color: #ffff00;">"\n"</span> +
+31.                   <span style="color: #ffff00;">"  bitcoind [options] &lt;command&gt; [params]  "</span> + _(<span style="color: #ffff00;">"Send command to Bitcoin server"</span>) + <span style="color: #ffff00;">"\n"</span> +
+32.                   <span style="color: #ffff00;">"  bitcoind [options] help                "</span> + _(<span style="color: #ffff00;">"List commands"</span>) + <span style="color: #ffff00;">"\n"</span> +
+33.                   <span style="color: #ffff00;">"  bitcoind [options] help &lt;command&gt;      "</span> + _(<span style="color: #ffff00;">"Get help for a command"</span>) + <span style="color: #ffff00;">"\n"</span>;
+
+34.             strUsage += <span style="color: #ffff00;">"\n"</span> + HelpMessage(HMM_BITCOIND);
+35.             strUsage += <span style="color: #ffff00;">"\n"</span> + HelpMessageCli(false);
+
+36.             fprintf(stdout, <span style="color: #ffff00;">"%s"</span>, strUsage.c_str());
+37.             return false;
+38.         }
+
+39.         // Command-line RPC
+40.         bool fCommandLine = false;
+41.         for (int i = 1; i &lt; argc; i++)
+42.             if (!IsSwitchChar(argv[i][0]) &amp;&amp; !boost::algorithm::istarts_with(argv[i], <span style="color: #ffff00;">"bitcoin:"</span>))
+43.                 fCommandLine = true;
+
+44.         if (fCommandLine)
+45.         {
+46.             int ret = CommandLineRPC(argc, argv);
+47.             exit(ret);
+48.         }
+49. #ifndef WIN32
+50.         fDaemon = GetBoolArg(<span style="color: #ffff00;">"-daemon"</span>, false);
+51.         if (fDaemon)
+52.         {
+53.             fprintf(stdout, <span style="color: #ffff00;">"Bitcoin server starting\n"</span>);
+
+54.             // Daemonize
+55.             pid_t pid = fork();
+56.             if (pid &lt; 0)
+57.             {
+58.                 fprintf(stderr, <span style="color: #ffff00;">"Error: fork() returned %d errno %d\n"</span>, pid, errno);
+59.                 return false;
+60.             }
+61.             if (pid &gt; 0) // Parent process, pid is child process id
+62.             {
+63.                 CreatePidFile(GetPidFile(), pid);
+64.                 return true;
+65.             }
+66.             // Child process falls through to rest of initialization
+
+67.             pid_t sid = setsid();
+68.             if (sid &lt; 0)
+69.                 fprintf(stderr, <span style="color: #ffff00;">"Error: setsid() returned %d errno %d\n"</span>, sid, errno);
+70.         }
+71. #endif
+72.         SoftSetBoolArg(<span style="color: #ffff00;">"-server"</span>, true);
+
+73.         detectShutdownThread = new boost::thread(boost::bind(&amp;DetectShutdownThread, &amp;threadGroup));
+74.         fRet = AppInit2(threadGroup);
+75.     }
+76.     catch (std::exception&amp; e) {
+77.         PrintExceptionContinue(&amp;e, <span style="color: #ffff00;">"AppInit()"</span>);
+78.     } catch (...) {
+79.         PrintExceptionContinue(NULL, <span style="color: #ffff00;">"AppInit()"</span>);
+80.     }
+
+</pre>
+
+
+
+
+<p>
+代码里增加了一些中文注释，作为对英文注释的补充。
+</p>
+<ul>
+<li>
+try..catch{}方式处理这段代码，因为这里涉及大量磁盘读取，有可能碰到无法打开文件，磁盘空间满等其他问题。
+
+</li>
+<li>
+ParseParameters()及ReadConfigFile()都是在读取一些参数，需要注意的是，命令行参数的优先级高于配置文件，比如执行了如下语句
+<pre class="example">
+bitcoind -testnet=0
+</pre>
+
+</li>
+</ul>
+
+<p>则在bitcoin.conf中配置的testnet则无效了。
+</p>
+<p>
+参数最终储存在mapArgs及mapMultiArgs中,定义如下:
+</p><pre class="example">
+map&lt;string, string&gt; mapArgs;
+map&lt;string, vector&lt;string&gt; &gt; mapMultiArgs;
+</pre>
+
+
+<p>
+使用了STL的map定义的,后面会经常使用这几个函数GetBoolArg()、GetArg()来查看参数设置,如:
+</p>
+
+
+<pre class="src src-C++">bool GetBoolArg(const std::string&amp; strArg, bool fDefault)
+{
+    if (mapArgs.count(strArg))
+    {
+        if (mapArgs[strArg].empty())
+            return true;
+        return (atoi(mapArgs[strArg]) != 0);
+    }
+    return fDefault;
+    }
+</pre>
+
+
+
+
+<p>
+经常会看到这样调用GetBoolArg():
+</p><pre class="example">
+GetBoolArg("-daemon", false)
+</pre>
+
+<p>如果没有找到相关设置，则返回假。 
+</p>
+<ul>
+<li>
+24行到38行是打印帮助提示。
+
+</li>
+<li>
+介绍下面的内容前,先介绍下RPC(远程过程调用),命令行方式下RPC的使用方法:
+<pre class="example">
+bitcoind -daemon //后台运行
+bitcoind getinfo //获取状态信息
+bitcoind -stop//停止daemon进程
+</pre>
+
+
+</li>
+<li>
+39行到48行判断是否是上面第二行(getinfo)的语句:首先判断参数是否有'-'或'/',并且不包含'bitcoin:',则执行RPC(使用的是JSON-RPC调用协议)
+</li>
+</ul>
+
+<p>bitcoin:URI是用于请款的,所以应该排除这种情况:
+<a href="#bitcoin://1F2EUzKR1XsLRCtEnsnpDQZ13XJgS6P3ZK?amount=0.001&message=donation">bitcoin://1F2EUzKR1XsLRCtEnsnpDQZ13XJgS6P3ZK?amount=0.001&amp;message=donation</a>
+</p>
+<p>
+接着执行CommandLineRPC(),具体执行RPC(远程过程调用).
+</p>
+<ul>
+<li>
+49行到71行是处理-daemon参数,假设这样运行bitcond
+<pre class="example">
+bitcoind -daemon
+</pre>
+
+</li>
+</ul>
+
+<p>通过fork()创建一个子进程,创建成功,父进程则在64行的时候返回,子进程接着执行下面的初始化,包括AppInit2()。
+在.bitcoin目录下创建了一个bitcoind.pid的文件，记录了子进程的PID。
+</p>
+
+
+
+<pre class="src src-C++">/** Initialize bitcoin.
+ *  @pre Parameters should be parsed and config file should be read.
+ */
+bool AppInit2(boost::thread_group&amp; threadGroup)
+{
+    // ****************** Step 1: setup   &#35774;&#32622;
+    ...
+    // ****************** Step 2: parameter interactions   &#21442;&#25968;&#20114;&#21160;(&#20027;&#35201;&#26159;&#19968;&#20123;&#21442;&#25968;&#35774;&#32622;)
+    ...
+    // ****************** Step 3: parameter-to-internal-flags   &#21442;&#25968;&#20256;&#20837;&#20869;&#37096;&#26631;&#35760;(bool&#22411;&#21464;&#37327;)
+    ...
+    // ****************** Step 4: application initialization: dir lock, daemonize, pidfile, debug log   &#24212;&#29992;&#21021;&#22987;&#21270;:&#38145;&#23450;&#30446;&#24405;,&#21518;&#21488;&#36816;&#34892;,&#35843;&#35797;&#20449;&#24687;
+    ...
+    // ****************** Step 5: verify wallet database integrity   &#30830;&#35748;&#38065;&#21253;&#25968;&#25454;&#24211;&#30340;&#23436;&#25972;&#24615;
+    ...
+    // ****************** Step 6: network initialization   &#32593;&#32476;&#21021;&#22987;&#21270;
+    ...
+    // ****************** Step 7: load block chain   &#21152;&#36733;&#22359;&#38142;
+    ...
+    // ****************** Step 8: load wallet   &#21152;&#36733;&#38065;&#21253;
+    ...
+    // ****************** Step 9: import blocks   &#23548;&#20837;&#22359;&#25968;&#25454;
+    ...
+    // ****************** Step 10: load peers   &#23548;&#20837;peers
+    ...
+    // ****************** Step 11: start node   &#24320;&#22987;&#33410;&#28857;(&#25366;&#30719;&#31243;&#24207;&#22312;&#36825;&#37324;)
+    ...
+    // ****************** Step 12: finished  &#23436;&#25104;
+    ...
+}
+</pre>
+
+
+
+
+<ul>
+<li>
+AppInit2里包含了bitcoin的大部分初始程序，包括读取'块索引'、加载块链、加载100个预产生的keys,导入peers.dat中的信息,以及初始化其他线程。
+
+
+</li>
+</ul>
+
+<p>未完待续,Contact me:
+</p><ul>
+<li>
+BitMessage:BM-2cVh8hpF9jcvDtFJCDddx518EEs76SvTUE
+</li>
+<li>
+BTC:1F2EUzKR1XsLRCtEnsnpDQZ13XJgS6P3ZK
+
+</li>
+</ul>
+
+<p><span class="timestamp-wrapper"> <span class="timestamp">2014-01-19 星期日</span></span><br/>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: root
+<a href="mailto:root@localhost.localdomain">&lt;root@localhost.localdomain&gt;</a>
+</p>
+<p class="date"> Date: 2014-02-11 15:19:39 CST</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
