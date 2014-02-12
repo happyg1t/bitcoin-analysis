@@ -1,9 +1,19 @@
 
+* 必读--如何阅读org文档
+  - 如果打开org文档 :: 请使用Emacs编辑器打开org文档！Windows环境的[[http://mirrors.ustc.edu.cn/gnu/emacs/windows/][下载链接]],Linux下直接使用apt-get或者yum直接安装emacs即可。
+  - 如何使用TAB按键 :: 在*和**、***以及更多星号开头的标题上敲击键盘上的Tab按键，可以展开和隐藏这个标题里的内容
+  - 如何理解行首的冒号 :: 行首的冒号(:)是方便org文档输出到HTML文档重点标注代码和命令，除了在#+BEGIN_EXAMPLE和#+END_EXAMPLE里原样输出 
+  - 如何生成HTML文档 :: 菜单栏里选择Org->Export/Publish(C-c C-e),C代表Ctrl按键,先按住Ctrl+c，再按住Ctrl+e，也会调用导出HTML的选项
+  - 配置bitcoin源代码目录 :: 修改，以便迅速在Emacs编辑器中打开bitcoin源代码。
+  - 如何链接到源代码 :: 比如file:~/.bitcoin ，将光标移动到file开头的链接上，按住Alt+x,接着输入org-open-at-point回车，就会自动跳转到源代码了，如果是目录，就会打开目录。
+  - 下载bitcoin源代码 :: 从[[https://github.com/bitcoin/bitcoin][github网站]]上直接下载或者使用命令行工具:
+  : git clone --branch v0.8.2 https://github.com/bitcoin/bitcoin.git
+    注意将bitcoin源代码目录放在~目录下，Windows下为export %AppData%的目录下
 
 * 准备工作
 假设你已经对STL及gdb有了一些基本认识，熟悉C++编程。
 ** 1.产生调试信息
-  在configure.ac文件里增加2行代码：
+  在configure.ac文件里增加2行代码(注意：行首有冒号)：
   #+BEGIN_EXAMPLE
   AC_INIT([Bitcoin]...
   : ${CFLAGS="-g -ggdb"}
@@ -27,6 +37,7 @@
 ** 静态分析
 *** 配置文件、快链数据文件、索引文件及相关目录:
     在root下有一个目录.bitcoin,首先介绍下几个文件:
+    [[file:~/.bitcoin]]
    - bitcoin.conf  :: 配置文件，bitcoind启动的时候会读取这个文件
    - debug.log  :: 调试信息输出到这个文件里
    - peers.dat  :: 存储的其他peer的信息
@@ -212,6 +223,7 @@ bitcoin:URI是用于请款的,所以应该排除这种情况:
     通过fork()创建一个子进程,创建成功,父进程则在64行的时候返回,子进程接着执行下面的初始化,包括AppInit2()。
     在.bitcoin目录下创建了一个bitcoind.pid的文件，记录了子进程的PID。
 
+    [[file:~/bitcoin/src/init.cpp::bool%20AppInit2%20boost%20thread_group%20threadGroup][file:~/bitcoin/src/init.cpp::bool AppInit2 boost thread_group threadGroup]]
     #+BEGIN_SRC C++
 
 /** Initialize bitcoin.
