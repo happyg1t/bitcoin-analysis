@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>bitcoin源码分析</title>
 <meta http-equiv="Content-Type" content="text/html;charset=gbk"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2014-02-12 10:40:51 CST"/>
+<meta name="generated" content="2014-02-12 12:23:06 CST"/>
 <meta name="author" content="root"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -73,6 +73,7 @@ lang="en" xml:lang="en">
 <h1 class="title">bitcoin源码分析</h1>
 
 
+
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
@@ -109,23 +110,20 @@ lang="en" xml:lang="en">
 <div class="outline-text-2" id="text-1">
 
 <dl>
-<dt>如果打开org文档</dt><dd>
-请使用Emacs编辑器打开org文档！Windows环境的<a href="http://mirrors.ustc.edu.cn/gnu/emacs/windows/">下载链接</a>,Linux下直接使用apt-get或者yum直接安装emacs即可。
+<dt>如何打开org文档</dt><dd>
+请使用Emacs编辑器打开org文档！Windows环境的<a href="http://mirrors.ustc.edu.cn/gnu/emacs/windows/">下载链接</a>,Linux下直接使用apt-get或者yum直接安装emacs即可;
 </dd>
 <dt>如何使用TAB按键</dt><dd>
-在*和**、***以及更多星号开头的标题上敲击键盘上的Tab按键，可以展开和隐藏这个标题里的内容
+在*和**、***以及更多星号开头的标题上敲击键盘上的Tab按键，可以展开和隐藏这个标题里的内容;
 </dd>
 <dt>如何理解行首的冒号</dt><dd>
-行首的冒号(:)是方便org文档输出到HTML文档重点标注代码和命令，除了在#+BEGIN<sub>EXAMPLE和</sub>#+END<sub>EXAMPLE里原样输出</sub> 
+行首的冒号(:)是方便org文档输出到HTML文档重点标注代码和命令，除了在#+BEGIN<sub>EXAMPLE和</sub>#+END<sub>EXAMPLE里原样输出</sub>;
 </dd>
 <dt>如何生成HTML文档</dt><dd>
-菜单栏里选择Org-&gt;Export/Publish(C-c C-e),C代表Ctrl按键,先按住Ctrl+c，再按住Ctrl+e，也会调用导出HTML的选项
-</dd>
-<dt>配置bitcoin源代码目录</dt><dd>
-修改，以便迅速在Emacs编辑器中打开bitcoin源代码。
+菜单栏里选择Org-&gt;Export/Publish,会调用导出HTML的选项;
 </dd>
 <dt>如何链接到源代码</dt><dd>
-比如<a href="/root/.bitcoin">file:~/.bitcoin</a> ，将光标移动到file开头的链接上，按住Alt+x,接着输入org-open-at-point回车，就会自动跳转到源代码了，如果是目录，就会打开目录。
+比如<a href="/root/.bitcoin">file:~/.bitcoin</a> ，将光标移动到file开头的链接上，鼠标点击，就会自动跳转到源代码了，如果是目录，就会打开目录。
 </dd>
 <dt>下载bitcoin源代码</dt><dd>
 从<a href="https://github.com/bitcoin/bitcoin">github网站</a>上直接下载或者使用命令行工具:
@@ -133,8 +131,17 @@ lang="en" xml:lang="en">
 git clone --branch v0.8.2 https://github.com/bitcoin/bitcoin.git
 </pre>
 
-<p>注意将bitcoin源代码目录放在~目录下，Windows下为export %AppData%
-</p>
+<p>注意将bitcoin源代码目录放在~目录下,目录名为bitcoin，以便迅速在Emacs编辑器中打开bitcoin源代码,Windows下的目录一般为:
+</p><pre class="example">
+C:\Documents and Settings\Administrator\Applicatin Data
+</pre>
+
+<p>如果没有这个目录，可以用如下命令查看目录路径
+</p><pre class="example">
+set appdata
+</pre>
+
+
 </dd>
 </dl>
 </div>
@@ -338,38 +345,38 @@ main()函数的重点是AppInit(),noui<sub>connect</sub>()是用来链接前端Qt的初始化程序
 12.         ParseParameters(argc, argv);
 13.         if (!boost::filesystem::is_directory(GetDataDir(false)))
 14.         {
-15.             fprintf(stderr, <span style="color: #ffff00;">"Error: Specified data directory \"%s\" does not exist.\n"</span>, mapArgs[<span style="color: #ffff00;">"-datadir"</span>].c_str());
+15.             fprintf(stderr, <span style="color: #ffa07a;">"Error: Specified data directory \"%s\" does not exist.\n"</span>, mapArgs[<span style="color: #ffa07a;">"-datadir"</span>].c_str());
 16.             return false;
 17.         }
 18.         ReadConfigFile(mapArgs, mapMultiArgs);
 19.         // Check for -testnet or -regtest parameter (TestNet() calls are only valid after this clause)
 20.         if (!SelectParamsFromCommandLine()) {
-21.             fprintf(stderr, <span style="color: #ffff00;">"Error: Invalid combination of -regtest and -testnet.\n"</span>);
+21.             fprintf(stderr, <span style="color: #ffa07a;">"Error: Invalid combination of -regtest and -testnet.\n"</span>);
 22.             return false;
 23.         }
 
-24.         if (mapArgs.count(<span style="color: #ffff00;">"-?"</span>) || mapArgs.count(<span style="color: #ffff00;">"--help"</span>))
+24.         if (mapArgs.count(<span style="color: #ffa07a;">"-?"</span>) || mapArgs.count(<span style="color: #ffa07a;">"--help"</span>))
 25.         {
 26.             // First part of help message is specific to bitcoind / RPC client
-27.             std::string strUsage = _(<span style="color: #ffff00;">"Bitcoin Core Daemon"</span>) + <span style="color: #ffff00;">" "</span> + _(<span style="color: #ffff00;">"version"</span>) + <span style="color: #ffff00;">" "</span> + FormatFullVersion() + <span style="color: #ffff00;">"\n\n"</span> +
-28.                 _(<span style="color: #ffff00;">"Usage:"</span>) + <span style="color: #ffff00;">"\n"</span> +
-29.                   <span style="color: #ffff00;">"  bitcoind [options]                     "</span> + _(<span style="color: #ffff00;">"Start Bitcoin server"</span>) + <span style="color: #ffff00;">"\n"</span> +
-30.                 _(<span style="color: #ffff00;">"Usage (deprecated, use bitcoin-cli):"</span>) + <span style="color: #ffff00;">"\n"</span> +
-31.                   <span style="color: #ffff00;">"  bitcoind [options] &lt;command&gt; [params]  "</span> + _(<span style="color: #ffff00;">"Send command to Bitcoin server"</span>) + <span style="color: #ffff00;">"\n"</span> +
-32.                   <span style="color: #ffff00;">"  bitcoind [options] help                "</span> + _(<span style="color: #ffff00;">"List commands"</span>) + <span style="color: #ffff00;">"\n"</span> +
-33.                   <span style="color: #ffff00;">"  bitcoind [options] help &lt;command&gt;      "</span> + _(<span style="color: #ffff00;">"Get help for a command"</span>) + <span style="color: #ffff00;">"\n"</span>;
+27.             std::string strUsage = _(<span style="color: #ffa07a;">"Bitcoin Core Daemon"</span>) + <span style="color: #ffa07a;">" "</span> + _(<span style="color: #ffa07a;">"version"</span>) + <span style="color: #ffa07a;">" "</span> + FormatFullVersion() + <span style="color: #ffa07a;">"\n\n"</span> +
+28.                 _(<span style="color: #ffa07a;">"Usage:"</span>) + <span style="color: #ffa07a;">"\n"</span> +
+29.                   <span style="color: #ffa07a;">"  bitcoind [options]                     "</span> + _(<span style="color: #ffa07a;">"Start Bitcoin server"</span>) + <span style="color: #ffa07a;">"\n"</span> +
+30.                 _(<span style="color: #ffa07a;">"Usage (deprecated, use bitcoin-cli):"</span>) + <span style="color: #ffa07a;">"\n"</span> +
+31.                   <span style="color: #ffa07a;">"  bitcoind [options] &lt;command&gt; [params]  "</span> + _(<span style="color: #ffa07a;">"Send command to Bitcoin server"</span>) + <span style="color: #ffa07a;">"\n"</span> +
+32.                   <span style="color: #ffa07a;">"  bitcoind [options] help                "</span> + _(<span style="color: #ffa07a;">"List commands"</span>) + <span style="color: #ffa07a;">"\n"</span> +
+33.                   <span style="color: #ffa07a;">"  bitcoind [options] help &lt;command&gt;      "</span> + _(<span style="color: #ffa07a;">"Get help for a command"</span>) + <span style="color: #ffa07a;">"\n"</span>;
 
-34.             strUsage += <span style="color: #ffff00;">"\n"</span> + HelpMessage(HMM_BITCOIND);
-35.             strUsage += <span style="color: #ffff00;">"\n"</span> + HelpMessageCli(false);
+34.             strUsage += <span style="color: #ffa07a;">"\n"</span> + HelpMessage(HMM_BITCOIND);
+35.             strUsage += <span style="color: #ffa07a;">"\n"</span> + HelpMessageCli(false);
 
-36.             fprintf(stdout, <span style="color: #ffff00;">"%s"</span>, strUsage.c_str());
+36.             fprintf(stdout, <span style="color: #ffa07a;">"%s"</span>, strUsage.c_str());
 37.             return false;
 38.         }
 
 39.         // Command-line RPC
 40.         bool fCommandLine = false;
 41.         for (int i = 1; i &lt; argc; i++)
-42.             if (!IsSwitchChar(argv[i][0]) &amp;&amp; !boost::algorithm::istarts_with(argv[i], <span style="color: #ffff00;">"bitcoin:"</span>))
+42.             if (!IsSwitchChar(argv[i][0]) &amp;&amp; !boost::algorithm::istarts_with(argv[i], <span style="color: #ffa07a;">"bitcoin:"</span>))
 43.                 fCommandLine = true;
 
 44.         if (fCommandLine)
@@ -378,16 +385,16 @@ main()函数的重点是AppInit(),noui<sub>connect</sub>()是用来链接前端Qt的初始化程序
 47.             exit(ret);
 48.         }
 49. #ifndef WIN32
-50.         fDaemon = GetBoolArg(<span style="color: #ffff00;">"-daemon"</span>, false);
+50.         fDaemon = GetBoolArg(<span style="color: #ffa07a;">"-daemon"</span>, false);
 51.         if (fDaemon)
 52.         {
-53.             fprintf(stdout, <span style="color: #ffff00;">"Bitcoin server starting\n"</span>);
+53.             fprintf(stdout, <span style="color: #ffa07a;">"Bitcoin server starting\n"</span>);
 
 54.             // Daemonize
 55.             pid_t pid = fork();
 56.             if (pid &lt; 0)
 57.             {
-58.                 fprintf(stderr, <span style="color: #ffff00;">"Error: fork() returned %d errno %d\n"</span>, pid, errno);
+58.                 fprintf(stderr, <span style="color: #ffa07a;">"Error: fork() returned %d errno %d\n"</span>, pid, errno);
 59.                 return false;
 60.             }
 61.             if (pid &gt; 0) // Parent process, pid is child process id
@@ -399,18 +406,18 @@ main()函数的重点是AppInit(),noui<sub>connect</sub>()是用来链接前端Qt的初始化程序
 
 67.             pid_t sid = setsid();
 68.             if (sid &lt; 0)
-69.                 fprintf(stderr, <span style="color: #ffff00;">"Error: setsid() returned %d errno %d\n"</span>, sid, errno);
+69.                 fprintf(stderr, <span style="color: #ffa07a;">"Error: setsid() returned %d errno %d\n"</span>, sid, errno);
 70.         }
 71. #endif
-72.         SoftSetBoolArg(<span style="color: #ffff00;">"-server"</span>, true);
+72.         SoftSetBoolArg(<span style="color: #ffa07a;">"-server"</span>, true);
 
 73.         detectShutdownThread = new boost::thread(boost::bind(&amp;DetectShutdownThread, &amp;threadGroup));
 74.         fRet = AppInit2(threadGroup);
 75.     }
 76.     catch (std::exception&amp; e) {
-77.         PrintExceptionContinue(&amp;e, <span style="color: #ffff00;">"AppInit()"</span>);
+77.         PrintExceptionContinue(&amp;e, <span style="color: #ffa07a;">"AppInit()"</span>);
 78.     } catch (...) {
-79.         PrintExceptionContinue(NULL, <span style="color: #ffff00;">"AppInit()"</span>);
+79.         PrintExceptionContinue(NULL, <span style="color: #ffa07a;">"AppInit()"</span>);
 80.     }
 
 </pre>
@@ -581,7 +588,7 @@ BTC:1F2EUzKR1XsLRCtEnsnpDQZ13XJgS6P3ZK
 <p class="author"> Author: root
 <a href="mailto:root@localhost.localdomain">&lt;root@localhost.localdomain&gt;</a>
 </p>
-<p class="date"> Date: 2014-02-12 10:40:51 CST</p>
+<p class="date"> Date: 2014-02-12 12:23:06 CST</p>
 <p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
 </div>
 </div>
